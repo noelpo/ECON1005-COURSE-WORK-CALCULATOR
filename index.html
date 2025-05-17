@@ -75,6 +75,17 @@
       text-align: center;
       min-height: 35px;
     }
+    .emoji {
+      font-size: 2em;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+    .fail {
+      color: #b71c1c;
+    }
+    .pass {
+      color: #33691e;
+    }
   </style>
 </head>
 <body>
@@ -126,14 +137,28 @@
       const q1 = Number(quizzes[0]), q2 = Number(quizzes[1]), q3 = Number(quizzes[2]), q4 = Number(quizzes[3]);
       const m1 = Number(midsems[0]), m2 = Number(midsems[1]);
 
+      // Coursework calculations (Quiz: 10%, Midsem: 40%)
       const quizTotal = ((q1 + q2 + q3 + q4) / 40) * 10;
       const midsemTotal = ((m1 + m2) / 40) * 40;
       const courseworkTotal = quizTotal + midsemTotal;
-      const neededFinal = Math.max(0, 50 - courseworkTotal);
 
-      document.getElementById("result").innerHTML =
-        `Coursework Score: ${courseworkTotal.toFixed(2)} / 50<br>
-        You need <strong>${neededFinal.toFixed(2)}%</strong> in the final exam to pass.`;
+      // How much needed from the Final (worth 50% of grade)
+      const neededFinalPercent = Math.max(0, 50 - courseworkTotal); // percent out of 50
+      const neededFinalMark = (neededFinalPercent / 50) * 65; // mark out of 65
+
+      let message = `Coursework Score: ${courseworkTotal.toFixed(2)} / 50<br>`;
+
+      if (neededFinalPercent <= 0) {
+        message += `<span class="pass">Congratulations! 🎉 You have already passed with your coursework alone.</span> <span class="emoji">😊</span>`;
+      } else if (neededFinalMark > 65) {
+        message += `<span class="fail">You need ${neededFinalPercent.toFixed(2)}% (${neededFinalMark.toFixed(2)} out of 65) in the final exam to pass.<br>This is more than the maximum possible, so it's not possible to pass. <span class="emoji">😢</span></span>`;
+      } else {
+        // If the requirement is possible, show happy/sad based on if it's below a certain threshold (e.g., passing < 50% final = happy)
+        const passEmoji = neededFinalPercent <= 25 ? "😊" : "😢";
+        const passClass = neededFinalPercent <= 25 ? "pass" : "fail";
+        message += `You need <span class="${passClass}">${neededFinalPercent.toFixed(2)}%</span> (<span class="${passClass}">${neededFinalMark.toFixed(2)}</span> out of 65) in the final exam to pass. <span class="emoji">${passEmoji}</span>`;
+      }
+      document.getElementById("result").innerHTML = message;
     }
   </script>
 </body>
